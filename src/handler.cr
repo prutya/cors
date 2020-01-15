@@ -155,14 +155,15 @@ module Cors
         # NOTE: Spec says: Since the list of headers can be unbounded,
         # simply returning supported headers from
         # Access-Control-Request-Headers can be enough
-        ctx.response.headers["Access-Control-Allow-Headers"] = Utils.prettify_headers_join(req_headers)
+        ctx.response.headers["Access-Control-Allow-Headers"] =
+          req_headers.map { |h| Utils.prettify_header(h) }.join(',')
       end
 
       if @allow_credentials
         ctx.response.headers["Access-Control-Allow-Credentials"] = "true"
       end
 
-      unless @max_age.zero?
+      if @max_age > 0
         ctx.response.headers["Access-Control-Max-Age"] = @max_age.to_s
       end
     end
@@ -203,7 +204,7 @@ module Cors
       end
 
       unless @exposed_headers.empty?
-        ctx.response.headers["Access-Control-Expose-Headers"] = @exposed_headers.join(", ")
+        ctx.response.headers["Access-Control-Expose-Headers"] = @exposed_headers.join(',')
       end
 
       if @allow_credentials
