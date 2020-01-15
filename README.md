@@ -1,6 +1,19 @@
 # Crystal CORS handler
 
-CORS is a `HTTP::Handler` handler implementing [Cross Origin Resource Sharing W3 specification](http://www.w3.org/TR/cors/) in Crystal.
+CORS is a `HTTP::Handler` handler (middleware) implementing [Cross Origin Resource Sharing W3 specification](http://www.w3.org/TR/cors/) in Crystal.
+
+## Installation
+In `shards.yml`:
+```yaml
+dependencies:
+  cors:
+    github: prutya/cors
+    branch: master # OR: version: x.x.x (Check the releases tab)
+```
+Then:
+```crystal
+require "cors"
+```
 
 ## Getting Started
 Add this handler to your `HTTP::Server` initializer call
