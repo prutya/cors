@@ -19,23 +19,19 @@ def init_http_context(
 end
 
 describe Cors::Handler do
+  noop = ->(ctx : HTTP::Server::Context) { nil }
+
   describe "#call" do
-    respond_ok = ->(ctx : HTTP::Server::Context) {
-      ctx.response << "OK"
-
-      nil
-    }
-
     it "processes the preflight request" do
       instance = Cors::Handler.new(
-        respond_ok:        respond_ok,
+        respond_ok:        noop,
         max_age:           86400,
         allow_credentials: true,
         allowed_origins:   ["http://localhost:8080"],
         allowed_methods:   ["PATCH", "GET", "POST", "PUT", "DELETE", "HEAD"],
         allowed_headers:   ["Accept", "Content-Type", "Authorization"]
       )
-      instance.next = -> (_ctx : HTTP::Server::Context) { nil }
+      instance.next = noop
       ctx = init_http_context(
         req_method:  "OPTIONS",
         req_headers: {
@@ -63,7 +59,7 @@ describe Cors::Handler do
 
     it "processes the actual request" do
       instance = Cors::Handler.new(
-        respond_ok:        respond_ok,
+        respond_ok:        noop,
         max_age:           86400,
         allow_credentials: true,
         allowed_origins:   ["http://localhost:8080"],
@@ -71,7 +67,7 @@ describe Cors::Handler do
         allowed_headers:   ["Accept", "Content-Type", "Authorization"],
         exposed_headers:   ["X-My-Custom-Header-1", "X-My-Custom-Header-2"],
       )
-      instance.next = -> (_ctx : HTTP::Server::Context) { nil }
+      instance.next = noop
       ctx = init_http_context(
         req_method: "PATCH",
         req_headers: {
