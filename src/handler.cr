@@ -1,5 +1,5 @@
 require "http"
-require "logger"
+require "log"
 
 require "./utils"
 
@@ -17,6 +17,7 @@ module Cors
       "Access-Control-Request-Headers"
     ]
 
+    @log                 : Log
     @exposed_headers     : Array(String)
     @allowed_origins_all : Bool
     @allowed_headers_all : Bool
@@ -25,13 +26,23 @@ module Cors
       @respond_ok        : Proc(HTTP::Server::Context, Nil),
       @max_age           : Int32 = 0,
       @allow_credentials : Bool = false,
-      @log               : Logger = Logger.new(STDOUT, Logger::INFO),
       @log_prefix        : Proc(HTTP::Server::Context, String)? = nil,
+      log                : Proc(Log) = ->() do
+        Log.builder.bind(
+          "cors",
+          Log::Severity::Info,
+          Log::IOBackend.new(STDOUT)
+        )
+
+        Log.for("cors", Log::Severity::Info)
+      end,
       allowed_origins    : Array(String) = [] of String,
       allowed_methods    : Array(String) = [] of String,
       allowed_headers    : Array(String) = [] of String,
       exposed_headers    : Array(String) = [] of String,
     )
+      @log = log.call
+
       @exposed_headers = exposed_headers.clone
 
       # NOTE: Normalize allowed origins
@@ -86,7 +97,7 @@ module Cors
       # NOTE: Process preflight request
       if ctx.request.method.upcase == "OPTIONS" &&
         ctx.request.headers["Access-Control-Request-Method"]?
-        @log.debug("#{log_prefix}Preflight request")
+        @log.debug { "#{log_prefix}Preflight request" }
 
         process_preflight(ctx)
 
@@ -94,7 +105,7 @@ module Cors
       end
 
       # NOTE: Process actual request
-      @log.debug("#{log_prefix}Actual request")
+      @log.debug { "#{log_prefix}Actual request" }
 
       process_actual_request(ctx)
 
@@ -108,13 +119,13 @@ module Cors
       ctx.response.headers.add("Vary", VARY_HEADERS)
 
       unless origin = ctx.request.headers["Origin"]?.as?(String)
-        @log.debug("#{log_prefix}Preflight aborted: Origin is not provided")
+        @log.debug { "#{log_prefix}Preflight aborted: Origin is not provided" }
 
         return
       end
 
       unless origin_allowed?(origin)
-        @log.debug("#{log_prefix}Preflight aborted: Origin #{origin} is not allowed")
+        @log.debug { "#{log_prefix}Preflight aborted: Origin #{origin} is not allowed" }
 
         return
       end
@@ -122,7 +133,7 @@ module Cors
       req_method = ctx.request.headers["Access-Control-Request-Method"].as(String)
 
       unless method_allowed?(req_method)
-        @log.debug("#{log_prefix}Preflight aborted: Method #{req_method} is not allowed")
+        @log.debug { "#{log_prefix}Preflight aborted: Method #{req_method} is not allowed" }
 
         return
       end
@@ -135,7 +146,7 @@ module Cors
         end
 
       unless headers_allowed?(req_headers)
-        @log.debug("#{log_prefix}Preflight aborted: Headers #{req_headers} are not allowed")
+        @log.debug { "#{log_prefix}Preflight aborted: Headers #{req_headers} are not allowed" }
 
         return
       end
@@ -174,13 +185,13 @@ module Cors
       ctx.response.headers.add("Vary", "Origin")
 
       unless origin = ctx.request.headers["Origin"]?.as?(String)
-        @log.debug("#{log_prefix}No CORS headers added: Origin is not provided")
+        @log.debug { "#{log_prefix}No CORS headers added: Origin is not provided" }
 
         return
       end
 
       unless origin_allowed?(origin)
-        @log.debug("#{log_prefix}No CORS headers added: Origin #{origin} is not allowed")
+        @log.debug { "#{log_prefix}No CORS headers added: Origin #{origin} is not allowed" }
 
         return
       end
@@ -192,7 +203,7 @@ module Cors
       # We think it's a nice feature to be able to have control on those
       # methods though.
       unless method_allowed?(ctx.request.method)
-        @log.debug("#{log_prefix}No CORS headers added: Method #{ctx.request.method.upcase} is not allowed")
+        @log.debug { "#{log_prefix}No CORS headers added: Method #{ctx.request.method.upcase} is not allowed" }
 
         return
       end
