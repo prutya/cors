@@ -47,7 +47,7 @@ server = HTTP::Server.new([
 If set to `true`, adds the [Access-Control-Allow-Credentials](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials) header to the response, otherwise does nothing.
 
 **log** (optional)
-`Logger`, defaults to a `STDOUT` logger with `info` severity. Your logger 🤷‍♂️
+`Log`, defaults to a `STDOUT` logger with `info` severity. Your logger 🤷‍♂️
 
 **log_prefix** (optional)
 `Proc` with `HTTP::Server::Context` argument, returning a `String` or `Nil`. Defaults to `nil`

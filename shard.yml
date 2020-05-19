@@ -1,7 +1,7 @@
 name: cors
-version: 0.2.2
+version: 0.2.3
 
 authors:
   - Anton Prudkohliad <anton.prudkohliad@gmail.com>
 
-crystal: 0.32.1
+crystal: 0.34.0
