@@ -46,13 +46,6 @@ server = HTTP::Server.new([
 `Bool`, defaults to `false`
 If set to `true`, adds the [Access-Control-Allow-Credentials](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials) header to the response, otherwise does nothing.
 
-**log** (optional)
-`Log`, defaults to a `STDOUT` logger with `info` severity. Your logger 🤷‍♂️
-
-**log_prefix** (optional)
-`Proc` with `HTTP::Server::Context` argument, returning a `String` or `Nil`. Defaults to `nil`
-If present, adds the result of the function call as a prefix to all log calls, otherwise adds nothing.
-
 **allowed_origins** (optional)
 `Array(String)`. Defaults to an empty array.
 The list of allowed origins. If the array contains `"*"`, allows all origins. [Access-Control-Allow-Origin](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin).
